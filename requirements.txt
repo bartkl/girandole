@@ -1,0 +1,4 @@
+PyYAML
+mutagen
+requests
+python-mpd2

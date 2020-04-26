@@ -1,3 +1,10 @@
+# Cache.
 __pycache__
+
+# Editor files.
 .swp*
 *~
+
+# Config files.
+/config/*
+!config/app_config.default.yaml

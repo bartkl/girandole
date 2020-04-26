@@ -1,0 +1,9 @@
+version: '3'
+services:
+  girandole:
+    build: .
+    ports:
+    - 5001:8080
+    volumes:
+    - ./config:/app/config
+    entrypoint: /bin/bash /init.sh
