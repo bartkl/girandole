@@ -1,30 +1,48 @@
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Path
 
 import girandole.app.routers.albums.repository as repository
-from girandole.app.types import Album, GenresSuggestion
+from girandole.app.types import AlbumsResponse, GenresSuggestionResponse, AlbumId, Queries, AlbumIds
 
 
 router = APIRouter()
 
 
-@router.get('/', response_model=List[Album])
-def get_all_albums():
-    albums = list(repository.get_all_albums())
-    return albums
+@router.get('/', response_model=AlbumsResponse)
+async def get_all_albums():
+    albums = repository.get_all_albums()
+    return {'albums': albums}
 
 
-@router.get('/{album_id}', response_model=Album)
-def get_album_by_id(album_id: int):
-    album = repository.get_album_by_id(album_id)
-    return album
+@router.get('/query/{queries:path}', response_model=AlbumsResponse)
+async def get_albums_by_queries(queries: Queries = Path(...)):
+    return {'albums': []}
 
 
-@router.get('/{album_id}/genres', response_model=GenresSuggestion)
-def get_album_genre_suggestions(album_id: int):
-    genres = repository.get_album_genre_suggestions(album_id)
+@router.get('/{album_ids}', response_model=AlbumsResponse)
+async def get_albums_by_ids(album_ids: AlbumIds = Path(...)):
+    albums = repository.get_albums_by_ids(album_ids)
+    return {'albums': albums}
+
+    
+@router.get('/{album_ids}/genres', response_model=GenresSuggestionResponse)
+async def get_albums_genre_suggestions(album_id: AlbumIds = Path(...)):
+    genres_suggestion = repository.get_album_genre_suggestions(album_id)
     return {
-        'album_id': album_id,
-        'suggestions': genres
+        'albums': genres_suggestion,
     }
+
+
+
+
+"""
+
+@app.route('/album/query/')
+@app.route('/album/query/<query:queries>')
+@app.route('/album/<int:album_id>/art')
+@app.route('/album/values/<string:key>')
+
+
+
+"""
