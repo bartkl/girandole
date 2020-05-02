@@ -1,7 +1,8 @@
 import datetime
+import re
 from typing import Optional, List
 
-from pydantic import BaseModel, DirectoryPath
+from pydantic import BaseModel, DirectoryPath, ConstrainedStr, errors
 
 
 def padded_int(size, digit=0):
@@ -17,13 +18,41 @@ def padded_int(size, digit=0):
     return PaddedInt
 
 
+def csv(element_char, sep=',', field_type=str):
+    class Csv(ConstrainedStr):
+        @classmethod
+        def __get_validators__(cls):
+            yield cls.validate
+            yield cls.parse_values
+
+        @classmethod
+        def validate(cls ,v):
+            regex = f'^{element_char}+$|^(({element_char}+{sep})+{element_char})'
+            r = re.compile(regex)
+            if r.match(v):
+                return v
+            else:
+                raise errors.StrRegexError(pattern=r.pattern)
+
+        @classmethod
+        def parse_values(cls, v):
+            return list(map(field_type, v.split(sep)))
+
+    return Csv
+
+
+AlbumId = int
+
+AlbumIds = csv(element_char=r'[\d]', sep=',', field_type=int)
+Queries = csv(element_char=r'[^\/]', sep='/', field_type=str)
+
+
 class Item(BaseModel):
     pass
 
 
-
 class Album(BaseModel):
-    id: int
+    id: AlbumId
     added: datetime.datetime
     albumartist: str
     albumartist_sort: str
@@ -62,6 +91,14 @@ class Album(BaseModel):
     # path: DirectoryPath
 
 
+class AlbumsResponse(BaseModel):
+    albums: List[Album]
+
+
 class GenresSuggestion(BaseModel):
-    album_id: int
+    album_id: AlbumId
     suggestions: Optional[List[str]]
+
+
+class GenresSuggestionResponse(BaseModel):
+    albums: List[GenresSuggestion]
