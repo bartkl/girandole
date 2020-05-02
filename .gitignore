@@ -6,4 +6,4 @@ __pycache__
 *~
 
 # Config files.
-!config.yaml
+config.yaml
