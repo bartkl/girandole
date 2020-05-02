@@ -3,4 +3,5 @@ from pathlib import Path
 from girandole.app.utils import config as config_utils
 
 
-CONFIG = config_utils.read_yaml(Path('/app') / 'config' / 'app_config.yaml')
+# TODO: Make the dir path configurable with an environment variable.
+CONFIG = config_utils.read_yaml(Path('/') / 'etc' / 'girandole' / 'config.yaml')
