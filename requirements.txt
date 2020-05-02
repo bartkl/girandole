@@ -1,4 +1,5 @@
 PyYAML
 mutagen
 requests
-python-mpd2
+beets
+pylast

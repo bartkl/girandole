@@ -3,7 +3,11 @@ services:
   girandole:
     build: .
     ports:
-    - 5001:8080
+    - ${GIRANDOLE_PORT}:8080
     volumes:
-    - ./config:/app/config
-    entrypoint: /bin/bash /init.sh
+    - ./app:/opt/girandole/girandole/app  # Remove in production.
+    - ./config.yaml:/etc/girandole/config.yaml
+    - ${GIRANDOLE_MUSIC_DIR}:/media/droppie/libraries/music
+    - ${GIRANDOLE_BEETS_DIR}:/media/droppie/libraries/music/.config/beets
+    - ${GIRANDOLE_WLG_DIR}:/root/.whatlastgenre
+    entrypoint: uvicorn --host 0.0.0.0 --port 8080 girandole.app.main:app --reload
