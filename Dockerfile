@@ -1,7 +1,7 @@
 FROM bartkl/uvicorn-fastapi:python3.7
 
 ENV PYTHONPATH "${PYTHONPATH}:/opt/whatlastgenre:/opt/girandole"
-ENV BEETSDIR "/media/droppie/libraries/music/.config/beets"
+ENV BEETSDIR "/etc/beets"
 
 COPY ./requirements.txt /etc/girandole-requirements.txt
 RUN pip install -r /etc/girandole-requirements.txt

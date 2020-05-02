@@ -1,6 +1,0 @@
-logging:
-  flask_log_through_gunicorn: yes
-
-cors:
-  enabled: no
-  origins: '*'
