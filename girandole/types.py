@@ -1,6 +1,6 @@
 import datetime
 import re
-from typing import Optional, List
+from typing import Optional, List, Any
 
 from pydantic import BaseModel, DirectoryPath, ConstrainedStr, errors
 
@@ -42,7 +42,6 @@ def csv(element_char, sep=',', field_type=str):
 
 
 AlbumId = int
-
 AlbumIds = csv(element_char=r'[\d]', sep=',', field_type=int)
 Queries = csv(element_char=r'[^\/]', sep='/', field_type=str)
 
@@ -59,7 +58,7 @@ class Album(BaseModel):
     albumartist_credit: str
     album: str
     genre: str
-    style: Optional[str] = None
+    style: Optional[str]
     discogs_albumid: Optional[int]
     discogs_artistid: Optional[int]
     discogs_labelid: Optional[int]
@@ -91,14 +90,18 @@ class Album(BaseModel):
     # path: DirectoryPath
 
 
-class AlbumsResponse(BaseModel):
-    albums: List[Album]
-
-
 class GenresSuggestion(BaseModel):
     album_id: AlbumId
-    suggestions: Optional[List[str]]
+    suggested_genres: Optional[List[str]]
 
 
-class GenresSuggestionResponse(BaseModel):
-    albums: List[GenresSuggestion]
+class BaseResponse(BaseModel):
+    results: Any
+
+
+class AlbumsResponse(BaseResponse):
+    results: List[Album]
+
+
+class GenresSuggestionResponse(BaseResponse):
+    results: List[GenresSuggestion]

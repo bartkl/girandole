@@ -1,6 +1,6 @@
 FROM bartkl/uvicorn-fastapi:python3.7
 
-ENV PYTHONPATH "${PYTHONPATH}:/opt/whatlastgenre:/opt/girandole"
+ENV PYTHONPATH "${PYTHONPATH}:/opt/whatlastgenre:/opt"
 ENV BEETSDIR "/etc/beets"
 
 COPY ./requirements.txt /etc/girandole-requirements.txt
@@ -12,7 +12,7 @@ RUN git clone \
          https://github.com/bartkl/whatlastgenre.git \
          /opt/whatlastgenre
 
-COPY ./app /opt/girandole/girandole/app
+COPY ./girandole /opt/girandole
 COPY ./config.yaml /etc/girandole/
 
 WORKDIR /
