@@ -1,0 +1,13 @@
+version: '3'
+services:
+  girandole:
+    build: .
+    ports:
+    - ${GIRANDOLE_PORT}:8080
+    volumes:
+    - ./girandole:/opt/girandole  # Remove in production.
+    - ./config.yaml:/etc/girandole/config.yaml
+    - ${GIRANDOLE_MUSIC_DIR}:${GIRANDOLE_MUSIC_DIR}  # Needs to mount to same location because Beets expects it there.
+    - ${GIRANDOLE_BEETS_DIR}:/etc/beets
+    - ${GIRANDOLE_WLG_DIR}:/root/.whatlastgenre
+    entrypoint: uvicorn --host 0.0.0.0 --port 8080 girandole.main:app --reload

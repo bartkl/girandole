@@ -1,0 +1,6 @@
+PyYAML
+mutagen
+requests
+beets
+pylast
+aiofiles
