@@ -1,6 +1,7 @@
+import logging
+import os
 from io import BytesIO
-from pathlib import Path
-from typing import List, Iterable, Tuple
+from typing import List, Iterable, Tuple, Optional
 
 import beets
 import beets.library
@@ -8,8 +9,10 @@ import beets.ui
 from plugin.beets.beetsplug.wlg import WhatLastGenre
 
 from girandole.types import Album, AlbumId, GenresSuggestion, Queries
+import girandole.utils
 
 
+logger = logging.getLogger(__name__)
 beets_lib = beets.ui._open_library(beets.config)
 
 
@@ -52,15 +55,31 @@ def get_db_album_by_id(album_id: AlbumId) -> beets.library.Album:
     return album
 
 
-def update_album_genres(album_ids: List[AlbumId], genres: List[str], write_tags: bool = False) -> List[Album]:
+def update_album_genres(album_ids: List[AlbumId],
+                        genres: List[str],
+                        base_path: Optional[str] =
+                            (os.environ.get('GIRANDOLE_MUSIC_DIR', '')),
+                        write_tags: Optional[bool] = False) -> List[Album]:
     result = []
     for album_id in album_ids:
         db_album = beets_lib.get_album(album_id)
-        db_album.genre = genres[0]
+        db_album.genre = genres[0]  # Currently only setting a single genre is allowed.
         db_album.store()
+
         if write_tags:
             for item in db_album.items():
-                item.try_write()
+                if base_path:
+                    item_path = girandole.utils.rebase_path(
+                        item.path,
+                        beets.config['directory'].as_filename(),
+                        base_path)
+                else:
+                    item_path = item.path
+                try:
+                    item.write(item_path)
+                except (beets.library.ReadError, beets.library.WriteError):
+                   # TODO: Implement decent error handling here.
+                   raise 
         result.append(db_album)
 
     return result
