@@ -68,11 +68,9 @@ def update_album_genres(album_ids: List[AlbumId],
 
         if write_tags:
             for item in db_album.items():
-                if base_path:
-                    item_path = girandole.utils.rebase_path(
-                        item.path,
-                        beets.config['directory'].as_filename(),
-                        base_path)
+                music_dir = beets.config['directory'].as_filename()
+                if base_path and base_path != music_dir:
+                    item_path = girandole.utils.rebase_path(item.path, music_dir, base_path)
                 else:
                     item_path = item.path
                 try:
