@@ -13,6 +13,5 @@ RUN git clone \
          /opt/whatlastgenre
 
 COPY ./girandole /opt/girandole
-COPY ./config.yaml /etc/girandole/
 
 WORKDIR /
