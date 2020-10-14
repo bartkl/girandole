@@ -7,6 +7,7 @@ import beets
 import beets.library
 import beets.ui
 from plugin.beets.beetsplug.wlg import WhatLastGenre
+from fastapi import HTTPException
 
 from girandole.types import Album, AlbumId, GenresSuggestion, Queries
 import girandole.utils
@@ -75,9 +76,18 @@ def update_album_genres(album_ids: List[AlbumId],
                     item_path = item.path
                 try:
                     item.write(item_path)
-                except (beets.library.ReadError, beets.library.WriteError):
-                   # TODO: Implement decent error handling here.
-                   raise 
+                except beets.library.ReadError:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Could not read file '{item_path}'. Make sure "
+                               f"it exists and that you have the necessary "
+                               f"permissions.")
+                except beets.library.WriteError:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Could not write to file '{item_path}'. Make sure "
+                               f"it exists and that you have the necessary "
+                               f"permissions.")
         result.append(db_album)
 
     return result
