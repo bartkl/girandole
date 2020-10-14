@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Path, Request, Body
+from fastapi import APIRouter, Path, Request, Body, HTTPException
 from starlette.responses import FileResponse
 
 import girandole.routers.albums.repository as repository
@@ -37,7 +37,13 @@ async def get_albums_genre_suggestions(album_ids: AlbumIds = Path(...)):
 @router.get('/{album_id}/art')
 async def get_album_art(album_id: AlbumId):
     db_album = repository.get_db_album_by_id(album_id)
-    album_art_path = db_album.artpath.decode()
+    try:
+        album_art_path = db_album.artpath.decode('utf8')
+    except AttributeError:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Album '{db_album.albumartist} - {db_album.album} "
+                   f"({db_album.year})' with ID 'album_id' has no album art.")
     return FileResponse(album_art_path, media_type='image/jpeg')
 
 
