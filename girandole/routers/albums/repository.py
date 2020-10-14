@@ -9,7 +9,7 @@ import beets.ui
 from plugin.beets.beetsplug.wlg import WhatLastGenre
 from fastapi import HTTPException
 
-from girandole.types import Album, AlbumId, GenresSuggestion, Queries
+from girandole.api_models import Album, AlbumId, GenresSuggestion, Queries
 import girandole.utils
 
 
@@ -69,25 +69,13 @@ def update_album_genres(album_ids: List[AlbumId],
 
         if write_tags:
             for item in db_album.items():
-                music_dir = beets.config['directory'].as_filename()
-                if base_path and base_path != music_dir:
+                music_dir = beets.config['directory'].as_filename().encode('utf8')
+                if not db_album.path.startswith(base_path.encode('utf8')):
                     item_path = girandole.utils.rebase_path(item.path, music_dir, base_path)
                 else:
                     item_path = item.path
-                try:
-                    item.write(item_path)
-                except beets.library.ReadError:
-                    raise HTTPException(
-                        status_code=500,
-                        detail=f"Could not read file '{item_path}'. Make sure "
-                               f"it exists and that you have the necessary "
-                               f"permissions.")
-                except beets.library.WriteError:
-                    raise HTTPException(
-                        status_code=500,
-                        detail=f"Could not write to file '{item_path}'. Make sure "
-                               f"it exists and that you have the necessary "
-                               f"permissions.")
-        result.append(db_album)
+
+                item.write(item_path)
+        result.append(Album.from_beets_lib(db_album))
 
     return result

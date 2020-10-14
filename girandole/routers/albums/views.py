@@ -1,10 +1,11 @@
 from typing import List
 
+import beets.library
 from fastapi import APIRouter, Path, Request, Body, HTTPException
 from starlette.responses import FileResponse
 
 import girandole.routers.albums.repository as repository
-from girandole.types import AlbumsResponse, GenresSuggestionResponse, AlbumId, Queries, AlbumIds
+from girandole.api_models import AlbumsResponse, GenresSuggestionResponse, AlbumId, Queries, AlbumIds
 
 
 router = APIRouter()
@@ -48,6 +49,19 @@ async def get_album_art(album_id: AlbumId):
 
 
 @router.post('/{album_ids}/genres', response_model=AlbumsResponse)
-async def post_album_genres(album_ids: AlbumIds, genres: List[str]):
-    albums = repository.update_album_genres(album_ids, genres, write_tags=True)
+async def post_album_genres(album_ids: AlbumIds, genres: List[str], write_tags: bool = False):
+    try:
+        albums = repository.update_album_genres(album_ids, genres, write_tags=write_tags)
+    except beets.library.ReadError:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not read file '{item_path}'. Make sure "
+                   f"it exists and that you have the necessary "
+                   f"permissions.")
+    except beets.library.WriteError:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not write to file '{item_path}'. Make sure "
+                   f"it exists and that you have the necessary "
+                   f"permissions.")
     return {'results': albums}
