@@ -17,12 +17,12 @@ beets_lib = beets.ui._open_library(beets.config)
 
 
 def get_all_albums() -> List[Album]:
-    albums = list(map(Album.parse_obj, beets_lib.albums()))
+    albums = list(map(Album.from_beets_lib, beets_lib.albums()))
     return albums
 
 
 def get_album_by_id(album_id: AlbumId) -> Album:
-    album = Album.parse_obj(beets_lib.get_album(album_id))
+    album = Album.from_beets_lib(beets_lib.get_album(album_id))
     return album
 
 
