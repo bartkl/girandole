@@ -69,7 +69,7 @@ class Album(BaseModel):
         # - Also, the dictcomp and non-explicitness feel dirty.
         return cls(**{field: getattr(album, field) for field in album.keys() if field != 'artpath'},
                    artpath=artpath,
-                   path=album.item_dir().decode('utf8'))
+                   path=album.path.decode('utf8'))
 
     id: AlbumId
     artpath: Optional[Path]
