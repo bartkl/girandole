@@ -7,3 +7,5 @@ __pycache__
 
 # Config files.
 config.yaml
+.env
+docker-compose.yaml
