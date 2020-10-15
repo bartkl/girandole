@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import os
 import re
 from pathlib import Path
 from typing import Optional, List, Any
@@ -63,18 +64,22 @@ class Album(BaseModel):
         except (TypeError, AttributeError):
             artpath = None
 
+        include_paths = {
+            'no': False,
+            'yes': True
+        }[os.environ.get('GIRANDOLE_INCLUDE_PATHS', 'no')]
         # TODO: Tidy this up.
         # - Use some sort of `PathType` or something. Also look at the
         #   Beets library API as well; how did they handle paths?
         # - Also, the dictcomp and non-explicitness feel dirty.
         return cls(**{field: getattr(album, field) for field in album.keys() if field != 'artpath'},
                    artpath=artpath,
-                   path=album.path.decode('utf8'))
+                   path=album.path.decode('utf8') if include_paths else None)
 
     id: AlbumId
     artpath: Optional[Path]
     added: datetime.datetime
-    path: Path
+    path: Optional[Path]
 
     albumartist: str
     albumartist_sort: str
