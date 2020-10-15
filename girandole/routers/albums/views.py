@@ -50,6 +50,12 @@ async def get_album_art(album_id: AlbumId):
 @router.post('/{album_ids}/genres', response_model=AlbumsResponse)
 async def post_album_genres(album_ids: AlbumIds, genres: List[str], write_tags: bool = False):
     try:
+        # For now, use the setting from '.env'. In the future this will be
+        # decided by Red Candle and passed in via the `write_tags` param.
+        write_tags = {
+            'no': False,
+            'yes': True 
+        }[os.environ.get('GIRANDOLE_WRITE_TAGS', 'no')]
         albums = repository.update_album_genres(album_ids, genres, write_tags=write_tags)
     except beets.library.ReadError:
         raise HTTPException(

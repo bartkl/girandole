@@ -1,6 +1,7 @@
 import logging
 import os
 from io import BytesIO
+from pathlib import Path
 from typing import List, Iterable, Tuple, Optional
 
 import beets
@@ -48,29 +49,43 @@ def get_albums_genres_suggestions(album_ids: List[AlbumId]) -> List[GenresSugges
 
 
 def get_albums_by_query(query: Queries) -> List[Album]:
+    # TODO.
     return get_all_albums()
 
 
 def update_album_genres(album_ids: List[AlbumId],
                         genres: List[str],
-                        base_path: Optional[str] =
-                            (os.environ.get('GIRANDOLE_MUSIC_DIR', '')),
+                        base_path: Optional[Path] = None,
                         write_tags: Optional[bool] = False) -> List[Album]:
     result = []
     for album_id in album_ids:
         db_album = beets_lib.get_album(album_id)
         db_album.genre = genres[0]  # Currently only setting a single genre is allowed.
-        db_album.store()
+
+        # db_album.store()
 
         if write_tags:
-            for item in db_album.items():
-                music_dir = beets.config['directory'].as_filename().encode('utf8')
-                if not db_album.path.startswith(base_path.encode('utf8')):
-                    item_path = girandole.utils.rebase_path(item.path, music_dir, base_path)
-                else:
-                    item_path = item.path
+            try:
+                new_base_path = base_path or Path(os.environ.get('GIRANDOLE_MUSIC_DIR'))
+            except TypeError:
+                new_base_path = None
 
-                item.write(item_path)
+            if new_base_path:
+                album_path = girandole.utils.path_from_beets(db_album.path)
+                base_path_in_db = Path(beets.config['directory'].as_filename())
+
+                # Check if paths already use the desired base path.
+                if new_base_path in album_path.parents:
+                    new_base_path = None
+
+            for item in db_album.items():
+                item_path = girandole.utils.path_from_beets(item.path)
+                item_path = girandole.utils.rebase_path(
+                    item_path, base_path_in_db, new_base_path
+                    if new_base_path
+                    else item_path)
+                item.write(str(item_path))
+
         result.append(Album.from_beets_lib(db_album))
 
     return result

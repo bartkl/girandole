@@ -1,33 +1,25 @@
 import os
 import beets.util
+from pathlib import PurePath, PureWindowsPath, PurePosixPath, PurePath
+from typing import Union
 
 
-def is_posix_path(path):
-    return path[0] == '/'
+def get_path_type(path):
+    return PurePosixPath if str(path)[0] == '/' else PureWindowsPath
 
 
-def rebase_path(path, basepath, new_basepath):
-    path, basepath, new_basepath = \
-        map(beets.util.displayable_path,
-        	(path, basepath, new_basepath))
+def rebase_path(path: PurePath, basepath: PurePath, new_basepath: PurePath):
+    relpath = path.relative_to(basepath)
 
-    if not path.startswith(basepath):
-        raise ValueError("Provided base path doesn't occur in path.")
+    new_basepath_type = get_path_type(new_basepath)
+    relpath = new_basepath_type(relpath)
 
-    if is_posix_path(basepath):
-        from posixpath import sep
-    else:
-        from ntpath import sep
+    new_path = new_basepath / relpath
+    return new_path
 
-    relpath = path.split(basepath + sep)[1]
 
-    if is_posix_path(new_basepath):
-        from ntpath import sep as from_sep
-        from posixpath import sep as to_sep
-    else:
-        from posixpath import sep as from_sep
-        from ntpath import sep as to_sep
+def path_from_beets(beets_path: Union[str, bytes]):
+    if isinstance(beets_path, bytes):
+        beets_path = beets_path.decode('utf8')
 
-    new_path = os.path.join(new_basepath, relpath.replace(from_sep, to_sep))
-
-    return beets.util.normpath(new_path)
+    return PurePath(beets_path)
