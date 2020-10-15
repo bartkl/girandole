@@ -62,7 +62,7 @@ def update_album_genres(album_ids: List[AlbumId],
         db_album = beets_lib.get_album(album_id)
         db_album.genre = genres[0]  # Currently only setting a single genre is allowed.
 
-        # db_album.store()
+        db_album.store()
 
         if write_tags:
             try:
