@@ -51,6 +51,7 @@ Queries = csv(element_char=r'[^\/]', sep='/', field_type=str)
 
 
 class Item(BaseModel):
+    # Not implemented.
     pass
 
 
@@ -71,8 +72,10 @@ class Album(BaseModel):
                    path=album.item_dir().decode('utf8'))
 
     id: AlbumId
-    added: datetime.datetime
     artpath: Optional[Path]
+    added: datetime.datetime
+    path: Path
+
     albumartist: str
     albumartist_sort: str
     albumartist_credit: str
@@ -106,8 +109,7 @@ class Album(BaseModel):
     original_year: padded_int(4)
     original_month: padded_int(2)
     original_day: padded_int(2)
-    path: Path
-    # items: Optional[List[Item]]
+    items: Optional[List[Item]]
 
 
 class GenresSuggestion(BaseModel):

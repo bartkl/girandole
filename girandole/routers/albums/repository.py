@@ -16,6 +16,9 @@ import girandole.utils
 logger = logging.getLogger(__name__)
 beets_lib = beets.ui._open_library(beets.config)
 
+wlg = WhatLastGenre()
+wlg.setup()
+
 
 def get_all_albums() -> List[Album]:
     albums = list(map(Album.from_beets_lib, beets_lib.albums()))
@@ -34,9 +37,6 @@ def get_albums_by_ids(album_ids: Iterable[AlbumId]) -> List[Album]:
 
 def get_album_genres_suggestion(album_id: AlbumId) -> GenresSuggestion:
     album = beets_lib.get_album(album_id)
-
-    wlg = WhatLastGenre()
-    wlg.setup()
     genres_suggestion = wlg.genres(album, dry=True).split(', ')
 
     return GenresSuggestion(album_id=album_id, suggested_genres=genres_suggestion)
@@ -49,11 +49,6 @@ def get_albums_genres_suggestions(album_ids: List[AlbumId]) -> List[GenresSugges
 
 def get_albums_by_query(query: Queries) -> List[Album]:
     return get_all_albums()
-
-
-def get_db_album_by_id(album_id: AlbumId) -> beets.library.Album:
-    album = beets_lib.get_album(album_id)
-    return album
 
 
 def update_album_genres(album_ids: List[AlbumId],
