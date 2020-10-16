@@ -66,25 +66,25 @@ def update_album_genres(album_ids: List[AlbumId],
 
         if write_tags:
             try:
-                new_base_path = PurePath(base_path or os.environ.get('GIRANDOLE_MUSIC_DIR'))
+                new_base_path = PurePath(base_path or girandole.utils.get_setting('GIRANDOLE_MUSIC_DIR'))
             except TypeError:
                 new_base_path = None
 
             if new_base_path:
-                uses_windows_paths = {
-                    'no': False,
-                    'yes': True
-                }[os.environ.get('GIRANDOLE_WINDOWS_PATHS', 'no')]
+                uses_windows_paths = girandole.utils.get_setting('GIRANDOLE_WINDOWS_PATHS', 'no', bool)
 
                 if uses_windows_paths:
-                    first_item = db_album.items().get()
-                    first_item_path = PureWindowsPath(first_item.path.decode('utf8'))
+                    first_item_path = girandole.utils.path_from_beets(
+                        db_album.items()
+                            .get()
+                            .path,
+                        PureWindowsPath)
                     album_path = first_item_path.parent
 
                     base_path_in_db = PureWindowsPath(beets.config['directory'].get())
 
                 else:
-                    album_path = PurePath(db_album.path.decode('utf8'))
+                    album_path = girandole.utils.path_from_beets(db_album.path, PurePath)
                     base_path_in_db = PurePath(beets.config['directory'].get())
 
                 # Check if paths already use the desired base path.
@@ -93,9 +93,9 @@ def update_album_genres(album_ids: List[AlbumId],
 
             for item in db_album.items():
                 if uses_windows_paths:
-                    item_path = PureWindowsPath(item.path.decode('utf8'))
+                    item_path = girandole.utils.path_from_beets(item.path, PureWindowsPath)
                 else:
-                    item_path = PurePath(item.path.decode('utf8'))
+                    item_path = girandole.utils.path_from_beets(item.path, PurePath)
 
                 if new_base_path:
                     item_path = girandole.utils.rebase_path(

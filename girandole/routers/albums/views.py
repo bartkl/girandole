@@ -6,6 +6,7 @@ from fastapi import APIRouter, Path, Request, Body, HTTPException
 from starlette.responses import FileResponse
 
 import girandole.routers.albums.repository as repository
+import girandole.utils
 from girandole.api_models import AlbumsResponse, GenresSuggestionResponse, AlbumId, Queries, AlbumIds
 
 
@@ -53,10 +54,7 @@ async def post_album_genres(album_ids: AlbumIds, genres: List[str], write_tags: 
     try:
         # For now, use the setting from '.env'. In the future this will be
         # decided by Red Candle and passed in via the `write_tags` param.
-        write_tags = {
-            'no': False,
-            'yes': True 
-        }[os.environ.get('GIRANDOLE_WRITE_TAGS', 'no')]
+        write_tags = girandole.utils.get_setting('GIRANDOLE_WRITE_TAGS', 'no', bool)
         albums = repository.update_album_genres(album_ids, genres, write_tags=write_tags)
     except beets.library.ReadError:
         raise HTTPException(

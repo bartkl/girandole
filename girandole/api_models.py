@@ -9,6 +9,8 @@ from typing import Optional, List, Any
 import beets.library
 from pydantic import BaseModel, DirectoryPath, ConstrainedStr, errors
 
+import girandole.utils
+
 
 def padded_int(size, digit=0):
     class PaddedInt(str):
@@ -64,22 +66,19 @@ class Album(BaseModel):
         except (TypeError, AttributeError):
             artpath = None
 
-        include_paths = {
-            'no': False,
-            'yes': True
-        }[os.environ.get('GIRANDOLE_INCLUDE_PATHS', 'no')]
-        # TODO: Tidy this up.
+        include_paths = girandole.utils.get_setting('GIRANDOLE_INCLUDE_PATHS', 'no', bool)
+        # TODO: Tidy this upa
         # - Use some sort of `PathType` or something. Also look at the
         #   Beets library API as well; how did they handle paths?
         # - Also, the dictcomp and non-explicitness feel dirty.
-        return cls(**{field: getattr(album, field) for field in album.keys() if field != 'artpath'},
+        return cls(**{field: getattr(album, field) for field in album.keys() if field not in ['artpath', 'path']},
                    artpath=artpath,
-                   path=album.path.decode('utf8') if include_paths else None)
+                   path=girandole.utils.path_from_beets(album.path) if include_paths else None)
 
     id: AlbumId
-    artpath: Optional[Path]
+    artpath: Optional[PurePath]
     added: datetime.datetime
-    path: Optional[Path]
+    path: Optional[PurePath]
 
     albumartist: str
     albumartist_sort: str
