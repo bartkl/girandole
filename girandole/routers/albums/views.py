@@ -61,13 +61,13 @@ async def post_album_genres(album_ids: AlbumIds, genres: List[str], write_tags: 
     except beets.library.ReadError:
         raise HTTPException(
             status_code=500,
-            detail=f"Could not read file '{item_path}'. Make sure "
+            detail=f"Could not read file. Make sure "
                    f"it exists and that you have the necessary "
                    f"permissions.")
     except beets.library.WriteError:
         raise HTTPException(
             status_code=500,
-            detail=f"Could not write to file '{item_path}'. Make sure "
+            detail=f"Could not write to file. Make sure "
                    f"it exists and that you have the necessary "
                    f"permissions.")
     return {'results': albums}
