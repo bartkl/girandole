@@ -22,4 +22,6 @@ def path_from_beets(beets_path: Union[str, bytes]):
     if isinstance(beets_path, bytes):
         beets_path = beets_path.decode('utf8')
 
-    return PurePath(beets_path)
+    path_type = get_path_type(beets_path)
+
+    return path_type(beets_path)
