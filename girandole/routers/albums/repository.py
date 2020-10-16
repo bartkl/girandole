@@ -66,13 +66,13 @@ def update_album_genres(album_ids: List[AlbumId],
 
         if write_tags:
             try:
-                new_base_path = base_path or Path(os.environ.get('GIRANDOLE_MUSIC_DIR'))
+                new_base_path = girandole.utils.path_from_beets(base_path or os.environ.get('GIRANDOLE_MUSIC_DIR'))
             except TypeError:
                 new_base_path = None
 
             if new_base_path:
                 album_path = girandole.utils.path_from_beets(db_album.path)
-                base_path_in_db = Path(beets.config['directory'].as_filename())
+                base_path_in_db = girandole.utils.path_from_beets(beets.config['directory'].get())
 
                 # Check if paths already use the desired base path.
                 if new_base_path in album_path.parents:
