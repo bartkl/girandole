@@ -80,10 +80,9 @@ def update_album_genres(album_ids: List[AlbumId],
 
             for item in db_album.items():
                 item_path = girandole.utils.path_from_beets(item.path)
-                item_path = girandole.utils.rebase_path(
-                    item_path, base_path_in_db, new_base_path
-                    if new_base_path
-                    else item_path)
+                if new_base_path:
+                    item_path = girandole.utils.rebase_path(
+                        item_path, base_path_in_db, new_base_path)
                 item.write(str(item_path))
 
         result.append(Album.from_beets_lib(db_album))
