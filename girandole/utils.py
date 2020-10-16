@@ -16,12 +16,3 @@ def rebase_path(path: PurePath, basepath: PurePath, new_basepath: PurePath):
 
     new_path = new_basepath / relpath
     return new_path
-
-
-def path_from_beets(beets_path: Union[str, bytes]):
-    if isinstance(beets_path, bytes):
-        beets_path = beets_path.decode('utf8')
-
-    path_type = get_path_type(beets_path)
-
-    return path_type(beets_path)
