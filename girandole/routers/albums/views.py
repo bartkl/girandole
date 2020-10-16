@@ -1,4 +1,6 @@
+import logging
 import os
+from pathlib import PureWindowsPath, PurePath
 from typing import List
 
 import beets.library
@@ -10,6 +12,7 @@ import girandole.utils
 from girandole.api_models import AlbumsResponse, GenresSuggestionResponse, AlbumId, Queries, AlbumIds
 
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -40,7 +43,28 @@ async def get_albums_genre_suggestions(album_ids: AlbumIds = Path(...)):
 @router.get('/{album_id}/art')
 async def get_album_art(album_id: AlbumId):
     album = repository.get_album_by_id(album_id)
-    album_art_path = album.artpath
+
+    try:
+        new_base_path = PurePath(girandole.utils.get_setting('GIRANDOLE_MUSIC_DIR'))
+    except TypeError:
+        new_base_path = None
+
+    if new_base_path:
+        uses_windows_paths = girandole.utils.get_setting('GIRANDOLE_WINDOWS_PATHS', 'no', bool)
+        if uses_windows_paths:
+            album_art_path = girandole.utils.path_from_beets(album.artpath, PureWindowsPath)
+            base_path_in_db = PureWindowsPath(beets.config['directory'].get())
+        else:
+            album_art_path = girandole.utils.path_from_beets(album.artpath)
+            base_path_in_db = PurePath(beets.config['directory'].get())
+
+        # Rebase if necessary.
+        if new_base_path not in album_art_path.parents:
+            album_art_path = girandole.utils.rebase_path(
+                album_art_path, base_path_in_db, new_base_path)
+    else:
+        album_art_path = girandole.utils.path_from_beets(album.artpath)
+
     if not album_art_path:
         raise HTTPException(
             status_code=404,

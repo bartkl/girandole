@@ -33,8 +33,9 @@ def get_setting(setting: str,
             'yes': True
         }[val]
     else:
-        return as_type(val)
-
+        if val is not None:
+            val = as_type(val)
+        return val
 
 def path_from_beets(path: Union[bytes, str], as_type: Optional[Any] = PurePath) -> PurePath:
     if isinstance(path, bytes):
