@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import os
 import re
-from pathlib import Path
+from pathlib import PurePath, Path
 from typing import Optional, List, Any
 
 import beets.library
@@ -76,9 +76,9 @@ class Album(BaseModel):
                    path=girandole.utils.path_from_beets(album.path) if include_paths else None)
 
     id: AlbumId
-    artpath: Optional[PurePath]
+    artpath: Optional[Path]
     added: datetime.datetime
-    path: Optional[PurePath]
+    path: Optional[Path]
 
     albumartist: str
     albumartist_sort: str
