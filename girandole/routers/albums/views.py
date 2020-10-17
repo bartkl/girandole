@@ -60,10 +60,8 @@ async def get_album_art(album_id: AlbumId):
             album_art_path = girandole.utils.path_from_beets(album.artpath)
             base_path_in_db = PurePath(beets.config['directory'].get())
 
-        # Rebase if necessary.
-        if new_base_path not in album_art_path.parents:
-            album_art_path = girandole.utils.rebase_path(
-                album_art_path, base_path_in_db, new_base_path)
+        album_art_path = girandole.utils.rebase_path(
+            album_art_path, base_path_in_db, new_base_path)
     else:
         album_art_path = girandole.utils.path_from_beets(album.artpath)
 

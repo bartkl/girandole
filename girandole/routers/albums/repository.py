@@ -88,10 +88,6 @@ def update_album_genres(album_ids: List[AlbumId],
                     album_path = girandole.utils.path_from_beets(db_album.path, PurePath)
                     base_path_in_db = PurePath(beets.config['directory'].get())
 
-                # Check if paths already use the desired base path.
-                if new_base_path in album_path.parents:
-                    new_base_path = None
-
             for item in db_album.items():
                 if uses_windows_paths:
                     item_path = girandole.utils.path_from_beets(item.path, PureWindowsPath)
