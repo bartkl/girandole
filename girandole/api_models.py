@@ -67,7 +67,7 @@ class Album(BaseModel):
         except (TypeError, AttributeError):
             artpath = None
 
-        include_paths = Config['girandole'].getboolean('paths in response', False)
+        include_paths = Config['girandole: albums'].getboolean('paths in response', False)
         # TODO: Tidy this upa
         # - Use some sort of `PathType` or something. Also look at the
         #   Beets library API as well; how did they handle paths?
