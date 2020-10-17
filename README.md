@@ -90,5 +90,58 @@ As you can see, it is pretty straight-forward. Note that the installation of Bee
 The defined environment variables `PYTHONPATH` and `BEETSDIR` will be explained in the _Configuration_ section.
 
 
-### Setup and Configuration
-...
+### Setup and configuration
+Now that all the necessary installations have been done, we need to configure the environment, tools and application.
+
+There's a few aspects to this.
+
+#### Beets and whatlastgenre
+You need to supply configuration for Beets and whatlastgenre. You can use your existing configs, or create dedicated new ones, but in both cases you have to make sure they will be available within the application.
+
+* If running locally, make sure Girandole, Beets and whatlastgenre are installed and configured in the same (virtual or not) environment.
+* When running in Docker, make sure you mount or copy all necessary configuration files.
+	- For Beets, you'll need the config file and library database. Those need to be present in the `$BEETSDIR` on the container.
+	- For whatlastgenre, there's the `.whatlastgenre` config dir in your home directory. This needs to be present at `/root/.whatlastgenre` in the container. Also, make sure the `whatlastgenre` package is in your `$PYTHONPATH` so it is discovered. See the `Dockerfile` earlier for an example.
+
+#### Girandole environment
+There are two environment variables with which you can control Girandole's behavior:
+
+* `$GIRANDOLE_CONFIG_DIR`: If defined, this should point to the directory where `config.ini` can be found. It defaults to `/etc/girandole`.
+* `$GIRANDOLE_MUSIC_DIR`: This should be set if you wish to rebase the paths in the Beets database for I/O operations. This is useful when you are running Girandole in a Docker container, and the path to the music files is different from that on the host computer.
+
+If running in a Docker container, make sure these environment variables are passed in the container. I recommend defining a `docker-compose.yaml` file in which you set the `environment`.
+
+#### Example `docker-compose.yaml`
+This is the `docker-compose.yaml` I use on my Raspberry Pi:
+
+```yaml
+version: '3'
+services:
+  girandole:
+    build:
+      context: .
+      dockerfile: Dockerfile.py37.armv7  # See `Dockerfile` earlier.
+    ports:
+      - ${GIRANDOLE_PORT}:8080
+    volumes:
+      - ./girandole:/opt/girandole  # Remove in production.
+      - ${GIRANDOLE_MUSIC_DIR}:${GIRANDOLE_MUSIC_DIR}
+      - ${GIRANDOLE_CONFIG_DIR}/config.ini:/etc/girandole/config.ini
+      - ${GIRANDOLE_BEETS_DB}:/etc/beets/library.db
+      - ${GIRANDOLE_BEETS_CONFIG}:/etc/beets/config.yaml
+      - ${GIRANDOLE_WLG_DIR}:/root/.whatlastgenre
+    environment:
+      - GIRANDOLE_CONFIG_DIR:${GIRANDOLE_CONFIG_DIR}
+    entrypoint: uvicorn --host 0.0.0.0 --port 8080 girandole.main:app --reload
+```
+
+The variables used here are defined in the accompanying `.env` file:
+
+```
+GIRANDOLE_PORT=8080
+GIRANDOLE_MUSIC_DIR=/media/droppie/libraries/music
+GIRANDOLE_BEETS_DB=/media/droppie/libraries/music/.meta/beets/library.db
+GIRANDOLE_BEETS_CONFIG=/media/droppie/libraries/music/.meta/beets/config.yaml
+GIRANDOLE_WLG_DIR=/home/bart/.whatlastgenre
+GIRANDOLE_CONFIG_DIR=/home/bart/.dotfiles/local/oblomov/conf/girandole
+```
