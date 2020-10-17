@@ -22,21 +22,6 @@ def rebase_path(path: PurePath, basepath: PurePath, new_basepath: PurePath):
     return new_path
 
 
-def get_setting(setting: str,
-                default_val: Optional[str] = None,
-                as_type: Optional[Any] = str) -> Any:
-    val = os.environ.get(setting, default_val)
-
-    if as_type is bool:
-        return {
-            'no': False,
-            'yes': True
-        }[val]
-    else:
-        if val is not None:
-            val = as_type(val)
-        return val
-
 def path_from_beets(path: Union[bytes, str], as_type: Optional[Any] = PurePath) -> PurePath:
     if isinstance(path, bytes):
         path = path.decode('utf8')

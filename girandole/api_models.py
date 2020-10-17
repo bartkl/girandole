@@ -10,6 +10,7 @@ import beets.library
 from pydantic import BaseModel, DirectoryPath, ConstrainedStr, errors
 
 import girandole.utils
+from girandole.config import Config
 
 
 def padded_int(size, digit=0):
@@ -66,7 +67,7 @@ class Album(BaseModel):
         except (TypeError, AttributeError):
             artpath = None
 
-        include_paths = girandole.utils.get_setting('GIRANDOLE_INCLUDE_PATHS', 'no', bool)
+        include_paths = Config['girandole'].getboolean('paths in response', False)
         # TODO: Tidy this upa
         # - Use some sort of `PathType` or something. Also look at the
         #   Beets library API as well; how did they handle paths?

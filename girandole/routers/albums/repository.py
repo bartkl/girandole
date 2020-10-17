@@ -7,11 +7,12 @@ from typing import List, Iterable, Tuple, Optional
 import beets
 import beets.library
 import beets.ui
-from plugin.beets.beetsplug.wlg import WhatLastGenre
 from fastapi import HTTPException
+from plugin.beets.beetsplug.wlg import WhatLastGenre
 
-from girandole.api_models import Album, AlbumId, GenresSuggestion, Queries
 import girandole.utils
+from girandole.config import Config
+from girandole.api_models import Album, AlbumId, GenresSuggestion, Queries
 
 
 logger = logging.getLogger(__name__)
@@ -64,14 +65,14 @@ def update_album_genres(album_ids: List[AlbumId],
 
         db_album.store()
 
-        if write_tags:
+        if write_tags or beets.config['import']['write'].get(bool):
             try:
-                new_base_path = PurePath(base_path or girandole.utils.get_setting('GIRANDOLE_MUSIC_DIR'))
+                new_base_path = PurePath(base_path or os.environ.get('GIRANDOLE_MUSIC_DIR'))
             except TypeError:
                 new_base_path = None
 
             if new_base_path:
-                uses_windows_paths = girandole.utils.get_setting('GIRANDOLE_WINDOWS_PATHS', 'no', bool)
+                uses_windows_paths = Config['beets'].getboolean('windows paths', False)
 
                 if uses_windows_paths:
                     first_item_path = girandole.utils.path_from_beets(
