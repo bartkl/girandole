@@ -25,6 +25,7 @@ async def get_all_albums():
 
 @router.get('/query/{queries:path}', response_model=AlbumsResponse)
 async def get_albums_by_query(queries: Queries = Path(...)):
+    # TODO: Implement.
     albums = repository.get_albums_by_query(queries)
     return {'results': albums}
 
