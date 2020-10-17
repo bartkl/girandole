@@ -111,6 +111,20 @@ There are two environment variables with which you can control Girandole's behav
 
 If running in a Docker container, make sure these environment variables are passed in the container. I recommend defining a `docker-compose.yaml` file in which you set the `environment`.
 
+#### Girandole config
+Finally, there's the application config: `config.ini`. Currently, the only two sections and settings can most easily be demonstrated by example:
+
+```ini
+[girandole: albums]
+paths in response = yes
+
+[beets]
+windows paths = no
+```
+
+* `paths in response`: This determines the inclusion of exclusion of the `path` of the albums in the API `Album` responses. By default this is disabled, since some people experience heavy performance issues with this enabled.
+* `windows paths`: If the paths in the Beets config and library are Windows paths, set this to `yes`. This is especially important if you run in a Docker container on a Windows host, and you have to rebase the library paths so Girandole can access the files.
+
 #### Example `docker-compose.yaml`
 This is the `docker-compose.yaml` I use on my Raspberry Pi:
 
@@ -144,4 +158,24 @@ GIRANDOLE_BEETS_DB=/media/droppie/libraries/music/.meta/beets/library.db
 GIRANDOLE_BEETS_CONFIG=/media/droppie/libraries/music/.meta/beets/config.yaml
 GIRANDOLE_WLG_DIR=/home/bart/.whatlastgenre
 GIRANDOLE_CONFIG_DIR=/home/bart/.dotfiles/local/oblomov/conf/girandole
+```
+
+### Running the server
+
+#### Local
+As can be seen in the example `docker-compose.yaml` earlier, the way to serve the app using `uvicorn` is:
+```
+$ uvicorn --host 0.0.0.0 --port 8080 girandole.main:app --reload
+```
+
+#### Running the docker container
+Start the Docker container including the mounts and environment:
+
+```
+$ docker-compose up
+```
+
+If you've changed something about the Docker configuration files, you should restart the container. If you've changed the `Dockerfile` contents in a way that requires rebuilding, you can call:
+```
+$ docker-compose up --build
 ```
