@@ -24,18 +24,16 @@ Whatever way you choose to install, the setup is basically as follows.
 The immediate dependencies of Girandole itself are:
 - _Python_ (≥ 3.7)
 - _FastAPI_ (0.54.1)
-- _uvicorn_ (0.11.3) (probably optional if you serve the app differently)
+- _uvicorn_ (0.11.3) (optional, but we use `unicorn` to serve the app)
 
 Furthermore Girandole is dependent on some tools:
-- _Beets_ (1.4.9)
+- _Beets_ (1.4.9).
 Girandole will use Beets's API for library access and reading configuration settings.
-- _whatlastgenre_ (My [API friendly fork](https://github.com/bartkl/whatlastgenre/tree/feature/api-friendly).)
+- _whatlastgenre_ (My [API friendly fork](https://github.com/bartkl/whatlastgenre/tree/feature/api-friendly)).
 Whatlastgenre is a tool that tries to find genres for your albums. This is what Girandole uses for its genre suggestions. We have forked the tool to make it suited for our purposes.
 
 
 ### Local installation
-_Warning_: this guide is not tested properly. I haven't done the installation locally yet, so please know that no guarantees can be made to its completeness and validity.
-
 Simply install the aforementioned dependencies. It is recommended to use a virtual environment.
 
 In a Python 3.7 environment, you can simply do:
@@ -58,11 +56,39 @@ This will clone the code to `/opt/whatlastgenre`.
 
 When done, please proceed to the _Configuration_ section.
 
-
 ### Installing using Docker container
+You can automate the installation described above in a `Dockerfile`.
+
+* If you're on an `amd64` CPU architecture (which is very likely), you can base your Dockerfile on one of the [uvicorn-gunicorn-fastapi](https://hub.docker.com/r/tiangolo/uvicorn-gunicorn-fastapi/) images.
+* If you're on an `amdv7` CPU architecture, such as a Raspberry Pi, you can use [my simple image](https://hub.docker.com/repository/docker/bartkl/uvicorn-fastapi/).
+* Otherwise, you'll have to manage the installations of FastAPI and Uvicorn in your own Dockerfile, extending one of the official [Python images](https://hub.docker.com/_/python) for instance.
+
+### Example Dockerfile
+My own `Dockerfile`, the one I use on my Raspberry Pi, looks as follows:
+
+```
+FROM bartkl/uvicorn-fastapi:python3.7
+
+ENV PYTHONPATH "${PYTHONPATH}:/opt/whatlastgenre:/opt"
+ENV BEETSDIR "/etc/beets"
+
+COPY ./requirements.txt /etc/girandole-requirements.txt
+RUN pip install -r /etc/girandole-requirements.txt
+
+RUN git clone \
+        --single-branch \
+        --branch feature/api-friendly \
+        https://github.com/bartkl/whatlastgenre.git \
+        /opt/whatlastgenre
+
+COPY ./girandole /opt/girandole
+
+WORKDIR /
+```
+
+As you can see, it is pretty straight-forward. Note that the installation of Beets is concealed in the `requirements.txt` file.
+The defined environment variables `PYTHONPATH` and `BEETSDIR` will be explained in the _Configuration_ section.
 
 
-### Configuration
-Of course, the configuration of these tools has to be in order as well. It's up to you if you want to use dedicated config files for Girandole, or have Girandole use the configs already in use by yourself. How to set this up will become more concrete further on.
-
-Finally, the environment needs to provide the necessary variables for Girandole to run properly. This too will be discussed in more detail later.
+### Setup and Configuration
+...
