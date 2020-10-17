@@ -12,6 +12,9 @@ def rebase_path(path: PurePath, basepath: PurePath, new_basepath: PurePath):
     # Make sure the arguments are consistent among each other. For instance,
     # for Windows paths use `WindowsPurePath`s for `path` and `basepath`, or
     # the logic won't work well.
+
+    if type(path) != type(basepath):
+        raise ValueError('`path` and `basepath` must be of the same type, i.e. both Windows or both Posix paths.')
     
     relpath = path.relative_to(basepath)
 
