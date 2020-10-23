@@ -122,7 +122,7 @@ paths in response = yes
 windows paths = no
 ```
 
-* `paths in response`: This determines the inclusion of exclusion of the `path` of the albums in the API `Album` responses. By default this is disabled, since some people experience heavy performance issues with this enabled.
+* `paths in response`: This determines the inclusion or exclusion of the `path` of the albums in the API `Album` responses. By default this is disabled, since some people experience heavy performance issues with this enabled.
 * `windows paths`: If the paths in the Beets config and library are Windows paths, set this to `yes`. This is especially important if you run in a Docker container on a Windows host, and you have to rebase the library paths so Girandole can access the files.
 
 #### Example `docker-compose.yaml`
