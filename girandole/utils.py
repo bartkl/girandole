@@ -12,6 +12,9 @@ def rebase_path(path: PurePath, basepath: PurePath, new_basepath: PurePath):
     # Make sure the arguments are consistent among each other. For instance,
     # for Windows paths use `WindowsPurePath`s for `path` and `basepath`, or
     # the logic won't work well.
+
+    if type(path) != type(basepath):
+        raise ValueError('`path` and `basepath` must be of the same type, i.e. both Windows or both Posix paths.')
     
     relpath = path.relative_to(basepath)
 
@@ -21,21 +24,6 @@ def rebase_path(path: PurePath, basepath: PurePath, new_basepath: PurePath):
     new_path = new_basepath / relpath
     return new_path
 
-
-def get_setting(setting: str,
-                default_val: Optional[str] = None,
-                as_type: Optional[Any] = str) -> Any:
-    val = os.environ.get(setting, default_val)
-
-    if as_type is bool:
-        return {
-            'no': False,
-            'yes': True
-        }[val]
-    else:
-        if val is not None:
-            val = as_type(val)
-        return val
 
 def path_from_beets(path: Union[bytes, str], as_type: Optional[Any] = PurePath) -> PurePath:
     if isinstance(path, bytes):

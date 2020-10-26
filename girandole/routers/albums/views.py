@@ -10,6 +10,7 @@ from starlette.responses import FileResponse
 import girandole.routers.albums.repository as repository
 import girandole.utils
 from girandole.api_models import AlbumsResponse, GenresSuggestionResponse, AlbumId, Queries, AlbumIds
+from girandole.config import Config
 
 
 logger = logging.getLogger(__name__)
@@ -24,6 +25,7 @@ async def get_all_albums():
 
 @router.get('/query/{queries:path}', response_model=AlbumsResponse)
 async def get_albums_by_query(queries: Queries = Path(...)):
+    # TODO: Implement.
     albums = repository.get_albums_by_query(queries)
     return {'results': albums}
 
@@ -45,12 +47,12 @@ async def get_album_art(album_id: AlbumId):
     album = repository.get_album_by_id(album_id)
 
     try:
-        new_base_path = PurePath(girandole.utils.get_setting('GIRANDOLE_MUSIC_DIR'))
+        new_base_path = PurePath(os.environ('GIRANDOLE_MUSIC_DIR'))
     except TypeError:
         new_base_path = None
 
     if new_base_path:
-        uses_windows_paths = girandole.utils.get_setting('GIRANDOLE_WINDOWS_PATHS', 'no', bool)
+        uses_windows_paths = Config['beets'].getboolean('windows paths', False)
         if uses_windows_paths:
             album_art_path = girandole.utils.path_from_beets(album.artpath, PureWindowsPath)
             base_path_in_db = PureWindowsPath(beets.config['directory'].get())
@@ -58,10 +60,8 @@ async def get_album_art(album_id: AlbumId):
             album_art_path = girandole.utils.path_from_beets(album.artpath)
             base_path_in_db = PurePath(beets.config['directory'].get())
 
-        # Rebase if necessary.
-        if new_base_path not in album_art_path.parents:
-            album_art_path = girandole.utils.rebase_path(
-                album_art_path, base_path_in_db, new_base_path)
+        album_art_path = girandole.utils.rebase_path(
+            album_art_path, base_path_in_db, new_base_path)
     else:
         album_art_path = girandole.utils.path_from_beets(album.artpath)
 
@@ -78,7 +78,6 @@ async def post_album_genres(album_ids: AlbumIds, genres: List[str], write_tags: 
     try:
         # For now, use the setting from '.env'. In the future this will be
         # decided by Red Candle and passed in via the `write_tags` param.
-        write_tags = girandole.utils.get_setting('GIRANDOLE_WRITE_TAGS', 'no', bool)
         albums = repository.update_album_genres(album_ids, genres, write_tags=write_tags)
     except beets.library.ReadError:
         raise HTTPException(
