@@ -2,10 +2,11 @@
 __pycache__
 
 # Editor files.
+/.idea/
 *.swp*
 *~
 
 # Config files.
-config.yaml
 .env
 docker-compose.yaml
+config.ini
