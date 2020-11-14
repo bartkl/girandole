@@ -41,18 +41,20 @@ In a Python 3.7 environment, you can simply do:
 $ pip install fastapi uvicorn beets
 ```
 
-Installing the whatlastgenre fork is a bit more cumbersome for now. You have to obtain the code from Git and place the files some place which is discoverable by the used Python interpreter. Later you'll see how we'll make this package discoverable by using `$PYTHONPATH`.
+Installing the whatlastgenre fork is a bit more cumbersome for now, since the `setup.py` file does not include
+installing the Beets plugin. You have to obtain the code from Git and place the files some place which is discoverable
+by the used Python interpreter. Later you'll see how we'll make this package discoverable by using `$PYTHONPATH`.
 
 For example:
-```sh
+```shell script
 $ git clone \
-      --single-branch \
+      --depth 1 \
       --branch feature/api-friendly \
       https://github.com/bartkl/whatlastgenre.git \
-      /opt/whatlastgenre
+      /desired/target/path
 ```
 
-This will clone the code to `/opt/whatlastgenre`.
+Make sure that `/desired/target/path` is within the module search path, for example in your `$PYTHONPATH`.
 
 When done, please proceed to the _Configuration_ section.
 
